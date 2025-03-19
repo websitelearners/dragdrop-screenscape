@@ -200,11 +200,23 @@ const DragDropScreens: React.FC = () => {
     });
   };
 
+  const handleUpdateScreenTitle = (id: string, title: string) => {
+    const updatedScreens = screens.map(screen => 
+      screen.id === id ? { ...screen, title } : screen
+    );
+    setScreens(updatedScreens);
+    toast({
+      title: "Title updated",
+      description: "The screen title has been updated",
+    });
+  };
+
   const handleUpdateScreenDescription = (id: string, description: string) => {
     const updatedScreens = screens.map(screen => 
       screen.id === id ? { ...screen, description } : screen
     );
     setScreens(updatedScreens);
+    // No toast for auto-save
   };
 
   const handleDeleteSubScreen = (screenId: string, subScreenId: string) => {
@@ -222,6 +234,30 @@ const DragDropScreens: React.FC = () => {
     toast({
       title: "Sub-screen deleted",
       description: "The sub-screen has been removed",
+    });
+  };
+
+  const handleUpdateSubScreenTitle = (
+    screenId: string,
+    subScreenId: string,
+    title: string
+  ) => {
+    const updatedScreens = screens.map(screen => {
+      if (screen.id === screenId) {
+        return {
+          ...screen,
+          subScreens: screen.subScreens.map(sub => 
+            sub.id === subScreenId ? { ...sub, title } : sub
+          )
+        };
+      }
+      return screen;
+    });
+
+    setScreens(updatedScreens);
+    toast({
+      title: "Title updated",
+      description: "The sub-screen title has been updated",
     });
   };
 
@@ -243,6 +279,7 @@ const DragDropScreens: React.FC = () => {
     });
 
     setScreens(updatedScreens);
+    // No toast for auto-save
   };
 
   const handlePromoteSubScreen = (screenId: string, subScreenId: string) => {
@@ -329,8 +366,10 @@ const DragDropScreens: React.FC = () => {
                     index={index}
                     onDelete={handleDeleteScreen}
                     onUpdateDescription={handleUpdateScreenDescription}
+                    onUpdateTitle={handleUpdateScreenTitle}
                     onDeleteSubScreen={handleDeleteSubScreen}
                     onUpdateSubScreenDescription={handleUpdateSubScreenDescription}
+                    onUpdateSubScreenTitle={handleUpdateSubScreenTitle}
                     onPromoteSubScreen={handlePromoteSubScreen}
                     onConvertToSubScreen={handleConvertToSubScreen}
                     totalScreens={screens.length}

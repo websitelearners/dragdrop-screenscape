@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { Screen, SubScreen } from '@/types/screen';
-import { ArrowDownRight, Grip, Trash2 } from 'lucide-react';
+import { ArrowDownRight, Check, Grip, Pencil, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import SubScreenItem from './SubScreenItem';
 
 interface ScreenItemProps {
@@ -12,8 +13,10 @@ interface ScreenItemProps {
   index: number;
   onDelete: (id: string) => void;
   onUpdateDescription: (id: string, description: string) => void;
+  onUpdateTitle: (id: string, title: string) => void;
   onDeleteSubScreen: (screenId: string, subScreenId: string) => void;
   onUpdateSubScreenDescription: (screenId: string, subScreenId: string, description: string) => void;
+  onUpdateSubScreenTitle: (screenId: string, subScreenId: string, title: string) => void;
   onPromoteSubScreen: (screenId: string, subScreenId: string) => void;
   onConvertToSubScreen: (screenId: string) => void;
   totalScreens: number;
@@ -24,12 +27,29 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
   index,
   onDelete,
   onUpdateDescription,
+  onUpdateTitle,
   onDeleteSubScreen,
   onUpdateSubScreenDescription,
+  onUpdateSubScreenTitle,
   onPromoteSubScreen,
   onConvertToSubScreen,
   totalScreens
 }) => {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState(screen.title);
+
+  const handleSaveTitle = () => {
+    if (titleInput.trim()) {
+      onUpdateTitle(screen.id, titleInput);
+      setIsEditingTitle(false);
+    }
+  };
+
+  const handleCancelTitleEdit = () => {
+    setTitleInput(screen.title);
+    setIsEditingTitle(false);
+  };
+
   return (
     <Draggable draggableId={screen.id} index={index}>
       {(provided) => (
@@ -45,7 +65,44 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
             
             <div className="flex-1">
               <div className="mb-2 flex items-center justify-between">
-                <h3 className="text-xl font-semibold">{screen.title}</h3>
+                {isEditingTitle ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <Input
+                      value={titleInput}
+                      onChange={(e) => setTitleInput(e.target.value)}
+                      className="h-8 text-xl font-semibold"
+                      autoFocus
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleSaveTitle}
+                      className="h-7 w-7"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleCancelTitleEdit}
+                      className="h-7 w-7"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xl font-semibold">{screen.title}</h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsEditingTitle(true)}
+                      className="h-7 w-7"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   {totalScreens > 1 && (
                     <Button
@@ -101,6 +158,7 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
                         screenId={screen.id}
                         onDelete={onDeleteSubScreen}
                         onUpdateDescription={onUpdateSubScreenDescription}
+                        onUpdateTitle={onUpdateSubScreenTitle}
                         onPromoteToScreen={onPromoteSubScreen}
                       />
                     ))}

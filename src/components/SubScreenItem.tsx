@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { SubScreen } from '@/types/screen';
-import { ArrowUpRight, Grip, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Check, Grip, Pencil, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 
 interface SubScreenItemProps {
   subScreen: SubScreen;
@@ -12,6 +13,7 @@ interface SubScreenItemProps {
   screenId: string;
   onDelete: (screenId: string, subScreenId: string) => void;
   onUpdateDescription: (screenId: string, subScreenId: string, description: string) => void;
+  onUpdateTitle: (screenId: string, subScreenId: string, title: string) => void;
   onPromoteToScreen: (screenId: string, subScreenId: string) => void;
 }
 
@@ -21,8 +23,24 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
   screenId,
   onDelete,
   onUpdateDescription,
+  onUpdateTitle,
   onPromoteToScreen
 }) => {
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState(subScreen.title);
+
+  const handleSaveTitle = () => {
+    if (titleInput.trim()) {
+      onUpdateTitle(screenId, subScreen.id, titleInput);
+      setIsEditingTitle(false);
+    }
+  };
+
+  const handleCancelTitleEdit = () => {
+    setTitleInput(subScreen.title);
+    setIsEditingTitle(false);
+  };
+
   return (
     <Draggable draggableId={`sub-${subScreen.id}`} index={index}>
       {(provided) => (
@@ -41,7 +59,44 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
             
             <div className="flex-1">
               <div className="mb-2 flex items-center justify-between">
-                <h3 className="font-medium">{subScreen.title}</h3>
+                {isEditingTitle ? (
+                  <div className="flex items-center gap-2 flex-1">
+                    <Input
+                      value={titleInput}
+                      onChange={(e) => setTitleInput(e.target.value)}
+                      className="h-7 font-medium"
+                      autoFocus
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleSaveTitle}
+                      className="h-6 w-6"
+                    >
+                      <Check className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={handleCancelTitleEdit}
+                      className="h-6 w-6"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium">{subScreen.title}</h3>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setIsEditingTitle(true)}
+                      className="h-6 w-6"
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
