@@ -6,3 +6,14 @@ export const reorder = (list: any[], startIndex: number, endIndex: number) => {
 
   return result;
 };
+
+// Convert a sub-screen to a full screen
+export const convertSubScreenToScreen = (subScreen: any, index: number = -1) => {
+  return {
+    id: `screen-${Date.now()}-${subScreen.id}`,
+    title: subScreen.title,
+    description: subScreen.description,
+    thumbnail: subScreen.thumbnail,
+    subScreens: [],
+  };
+};

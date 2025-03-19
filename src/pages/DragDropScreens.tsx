@@ -1,14 +1,12 @@
-
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { Screen, SubScreen } from '@/types/screen';
-import { reorder } from '@/utils/dragDropUtils';
+import { reorder, convertSubScreenToScreen } from '@/utils/dragDropUtils';
 import ScreenItem from '@/components/ScreenItem';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
-// Sample data with image placeholders
 const initialScreens: Screen[] = [
   {
     id: 'screen-1',
@@ -51,7 +49,7 @@ const DragDropScreens: React.FC = () => {
   const { toast } = useToast();
 
   const handleDragEnd = (result: DropResult) => {
-    const { source, destination, type } = result;
+    const { source, destination, type, draggableId } = result;
 
     // Dropped outside the list
     if (!destination) {
@@ -74,9 +72,42 @@ const DragDropScreens: React.FC = () => {
       return;
     }
 
-    // Handle sub-screen reordering
+    // Handle sub-screen reordering or promotion
     if (type === 'subscreen') {
       const screenId = source.droppableId.replace('subscreen-', '');
+      
+      // Check if the subscreen is dropped in the main screens container
+      if (destination.droppableId === 'screens-droppable') {
+        // This is the case where a subscreen is being promoted to a main screen
+        // Find the source screen and the subscreen
+        const sourceScreen = screens.find(s => s.id === screenId);
+        if (!sourceScreen) return;
+        
+        const sourceSubScreens = [...sourceScreen.subScreens];
+        const [movedSubScreen] = sourceSubScreens.splice(source.index, 1);
+        
+        // Convert the subscreen to a main screen
+        const newScreen = convertSubScreenToScreen(movedSubScreen);
+        
+        // Create a new array of screens with the promoted subscreen
+        let newScreens = [...screens];
+        
+        // Update the source screen without the moved subscreen
+        newScreens = newScreens.map(s => 
+          s.id === screenId ? { ...s, subScreens: sourceSubScreens } : s
+        );
+        
+        // Add the new screen at the destination index
+        newScreens.splice(destination.index, 0, newScreen);
+        
+        setScreens(newScreens);
+        toast({
+          title: "Sub-screen promoted",
+          description: "The sub-screen has been converted to a main screen",
+        });
+        return;
+      }
+      
       const targetScreenId = destination.droppableId.replace('subscreen-', '');
       
       // If moving within the same screen
@@ -232,6 +263,7 @@ const DragDropScreens: React.FC = () => {
         <h1 className="mb-2 text-3xl font-bold">Drag-n-Drop Screens</h1>
         <p className="text-muted-foreground">
           Arrange your screens and sub-screens by dragging them into the desired order.
+          You can also promote a sub-screen to a main screen by dragging it to the main list.
         </p>
       </div>
 
