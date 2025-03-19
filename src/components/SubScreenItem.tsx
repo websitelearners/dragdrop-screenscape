@@ -47,7 +47,7 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="font-medium">{subScreen.title}</h3>
                 <div className="flex items-center gap-1">
-                  {snapshot.isDragging && snapshot.draggingOver === 'screens-droppable' && (
+                  {snapshot.isDragging && (
                     <div className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-200 flex items-center gap-1">
                       <ArrowUpRight className="h-3 w-3" />
                       <span>Drag to promote</span>

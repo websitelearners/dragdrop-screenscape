@@ -15,7 +15,6 @@ interface ScreenItemProps {
   onDeleteSubScreen: (screenId: string, subScreenId: string) => void;
   onUpdateSubScreenDescription: (screenId: string, subScreenId: string, description: string) => void;
   onPromoteSubScreen?: (screenId: string, subScreenId: string) => void;
-  isDraggedOver?: boolean;
 }
 
 const ScreenItem: React.FC<ScreenItemProps> = ({
@@ -25,8 +24,7 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
   onUpdateDescription,
   onDeleteSubScreen,
   onUpdateSubScreenDescription,
-  onPromoteSubScreen,
-  isDraggedOver = false
+  onPromoteSubScreen
 }) => {
   return (
     <Draggable draggableId={screen.id} index={index}>
@@ -71,24 +69,13 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
               </div>
 
               <Droppable droppableId={`subscreen-${screen.id}`} type="subscreen">
-                {(provided, snapshot) => (
+                {(provided) => (
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className={`ml-6 space-y-3 border-l-2 border-muted pl-4 ${
-                      isDraggedOver 
-                        ? "py-2 px-2 rounded-lg outline-dashed outline-2 outline-green-500 bg-green-50 dark:bg-green-900/20 transition-all duration-200" 
-                        : ""
-                    }`}
+                    className="ml-6 space-y-3 border-l-2 border-muted pl-4"
                   >
-                    <h4 className="font-medium text-muted-foreground">
-                      Sub Screens
-                      {isDraggedOver && (
-                        <span className="ml-2 text-xs bg-green-100 text-green-700 dark:bg-green-800 dark:text-green-200 px-2 py-1 rounded">
-                          Drop to convert
-                        </span>
-                      )}
-                    </h4>
+                    <h4 className="font-medium text-muted-foreground">Sub Screens</h4>
                     
                     {screen.subScreens.map((subScreen: SubScreen, subIndex: number) => (
                       <SubScreenItem
