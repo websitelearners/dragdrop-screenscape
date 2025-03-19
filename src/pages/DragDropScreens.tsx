@@ -207,6 +207,17 @@ const DragDropScreens: React.FC = () => {
     setScreens(updatedScreens);
   };
 
+  const handleUpdateScreenTitle = (id: string, title: string) => {
+    const updatedScreens = screens.map(screen => 
+      screen.id === id ? { ...screen, title } : screen
+    );
+    setScreens(updatedScreens);
+    toast({
+      title: "Title updated",
+      description: "The screen title has been updated",
+    });
+  };
+
   const handleDeleteSubScreen = (screenId: string, subScreenId: string) => {
     const updatedScreens = screens.map(screen => {
       if (screen.id === screenId) {
@@ -243,6 +254,30 @@ const DragDropScreens: React.FC = () => {
     });
 
     setScreens(updatedScreens);
+  };
+
+  const handleUpdateSubScreenTitle = (
+    screenId: string,
+    subScreenId: string,
+    title: string
+  ) => {
+    const updatedScreens = screens.map(screen => {
+      if (screen.id === screenId) {
+        return {
+          ...screen,
+          subScreens: screen.subScreens.map(sub => 
+            sub.id === subScreenId ? { ...sub, title } : sub
+          )
+        };
+      }
+      return screen;
+    });
+
+    setScreens(updatedScreens);
+    toast({
+      title: "Title updated",
+      description: "The sub-screen title has been updated",
+    });
   };
 
   const handlePromoteSubScreen = (screenId: string, subScreenId: string) => {
@@ -329,6 +364,7 @@ const DragDropScreens: React.FC = () => {
                     index={index}
                     onDelete={handleDeleteScreen}
                     onUpdateDescription={handleUpdateScreenDescription}
+                    onUpdateTitle={handleUpdateScreenTitle}
                     onDeleteSubScreen={handleDeleteSubScreen}
                     onUpdateSubScreenDescription={handleUpdateSubScreenDescription}
                     onPromoteSubScreen={handlePromoteSubScreen}
