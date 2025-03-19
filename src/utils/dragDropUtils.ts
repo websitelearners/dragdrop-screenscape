@@ -18,6 +18,16 @@ export const convertSubScreenToScreen = (subScreen: any, index: number = -1) => 
   };
 };
 
+// Convert a screen to a sub-screen
+export const convertScreenToSubScreen = (screen: any) => {
+  return {
+    id: `subscreen-${Date.now()}-${screen.id}`,
+    title: screen.title,
+    description: screen.description,
+    thumbnail: screen.thumbnail,
+  };
+};
+
 // Check if item is a sub-screen being dragged to become a screen
 export const isPromotingSubScreen = (source: any, destination: any) => {
   return (

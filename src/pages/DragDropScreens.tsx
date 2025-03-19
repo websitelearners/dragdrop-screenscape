@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { DragDropContext, Droppable, DropResult, DragStart, DragUpdate } from 'react-beautiful-dnd';
 import { Screen, SubScreen } from '@/types/screen';
-import { reorder, convertSubScreenToScreen, isPromotingSubScreen } from '@/utils/dragDropUtils';
+import { reorder, convertSubScreenToScreen, convertScreenToSubScreen, isPromotingSubScreen } from '@/utils/dragDropUtils';
 import ScreenItem from '@/components/ScreenItem';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -47,27 +47,82 @@ const initialScreens: Screen[] = [
 const DragDropScreens: React.FC = () => {
   const [screens, setScreens] = useState<Screen[]>(initialScreens);
   const [isDraggingSubScreen, setIsDraggingSubScreen] = useState(false);
+  const [isDraggingScreen, setIsDraggingScreen] = useState(false);
   const [draggedOverMainContainer, setDraggedOverMainContainer] = useState(false);
+  const [draggedOverSubContainer, setDraggedOverSubContainer] = useState('');
   const { toast } = useToast();
 
   const handleDragStart = (start: DragStart) => {
     if (start.source.droppableId.startsWith('subscreen-')) {
       setIsDraggingSubScreen(true);
+    } else if (start.source.droppableId === 'screens-droppable') {
+      setIsDraggingScreen(true);
     }
   };
 
   const handleDragUpdate = (update: DragUpdate) => {
     if (isDraggingSubScreen && update.destination) {
       setDraggedOverMainContainer(update.destination.droppableId === 'screens-droppable');
-    } else if (isDraggingSubScreen) {
+      setDraggedOverSubContainer('');
+    } else if (isDraggingScreen && update.destination) {
       setDraggedOverMainContainer(false);
+      const destId = update.destination.droppableId;
+      if (destId.startsWith('subscreen-')) {
+        setDraggedOverSubContainer(destId.replace('subscreen-', ''));
+      } else {
+        setDraggedOverSubContainer('');
+      }
+    } else {
+      setDraggedOverMainContainer(false);
+      setDraggedOverSubContainer('');
     }
   };
 
   const handleDragEnd = (result: DropResult) => {
+    setIsDraggingSubScreen(false);
+    setIsDraggingScreen(false);
+    setDraggedOverMainContainer(false);
+    setDraggedOverSubContainer('');
+    
     const { source, destination, type, draggableId } = result;
 
     if (!destination) {
+      return;
+    }
+
+    if (type === 'screen' && destination.droppableId.startsWith('subscreen-')) {
+      const targetScreenId = destination.droppableId.replace('subscreen-', '');
+      const screenIndex = screens.findIndex(s => s.id === draggableId);
+      
+      if (screenIndex === -1) return;
+      
+      if (draggableId === targetScreenId) {
+        toast({
+          title: "Invalid operation",
+          description: "Cannot convert a screen into its own sub-screen",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const [movedScreen] = screens.splice(screenIndex, 1);
+      const newSubScreen = convertScreenToSubScreen(movedScreen);
+      
+      const updatedScreens = screens.map(s => {
+        if (s.id === targetScreenId) {
+          return {
+            ...s,
+            subScreens: [...s.subScreens, newSubScreen]
+          };
+        }
+        return s;
+      });
+      
+      setScreens(updatedScreens);
+      toast({
+        title: "Screen converted",
+        description: "The screen has been converted to a sub-screen",
+      });
       return;
     }
 
@@ -293,7 +348,8 @@ const DragDropScreens: React.FC = () => {
         <h1 className="mb-2 text-3xl font-bold">Drag-n-Drop Screens</h1>
         <p className="text-muted-foreground">
           Arrange your screens and sub-screens by dragging them into the desired order.
-          You can also promote a sub-screen to a main screen by dragging it to the main list or using the promote button.
+          You can promote a sub-screen to a main screen by dragging it to the main list or using the promote button.
+          You can also convert a main screen to a sub-screen by dragging it into another screen's sub-screens area.
         </p>
       </div>
 
@@ -333,6 +389,7 @@ const DragDropScreens: React.FC = () => {
                     onDeleteSubScreen={handleDeleteSubScreen}
                     onUpdateSubScreenDescription={handleUpdateSubScreenDescription}
                     onPromoteSubScreen={handlePromoteSubScreen}
+                    isDraggedOver={draggedOverSubContainer === screen.id}
                   />
                   <Button
                     variant="outline"
