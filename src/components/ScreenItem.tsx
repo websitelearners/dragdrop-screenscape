@@ -2,7 +2,7 @@
 import React from 'react';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { Screen, SubScreen } from '@/types/screen';
-import { Grip, Trash2 } from 'lucide-react';
+import { ArrowDownRight, Grip, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import SubScreenItem from './SubScreenItem';
@@ -14,6 +14,9 @@ interface ScreenItemProps {
   onUpdateDescription: (id: string, description: string) => void;
   onDeleteSubScreen: (screenId: string, subScreenId: string) => void;
   onUpdateSubScreenDescription: (screenId: string, subScreenId: string, description: string) => void;
+  onPromoteSubScreen: (screenId: string, subScreenId: string) => void;
+  onConvertToSubScreen: (screenId: string) => void;
+  totalScreens: number;
 }
 
 const ScreenItem: React.FC<ScreenItemProps> = ({
@@ -22,7 +25,10 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
   onDelete,
   onUpdateDescription,
   onDeleteSubScreen,
-  onUpdateSubScreenDescription
+  onUpdateSubScreenDescription,
+  onPromoteSubScreen,
+  onConvertToSubScreen,
+  totalScreens
 }) => {
   return (
     <Draggable draggableId={screen.id} index={index}>
@@ -40,13 +46,25 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
             <div className="flex-1">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-xl font-semibold">{screen.title}</h3>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => onDelete(screen.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <div className="flex gap-2">
+                  {totalScreens > 1 && (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => onConvertToSubScreen(screen.id)}
+                      title="Convert to sub-screen"
+                    >
+                      <ArrowDownRight className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => onDelete(screen.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               
               <div className="mb-3 flex gap-4">
@@ -83,6 +101,7 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
                         screenId={screen.id}
                         onDelete={onDeleteSubScreen}
                         onUpdateDescription={onUpdateSubScreenDescription}
+                        onPromoteToScreen={onPromoteSubScreen}
                       />
                     ))}
                     

@@ -17,3 +17,13 @@ export const convertSubScreenToScreen = (subScreen: any, index: number = -1) => 
     subScreens: [],
   };
 };
+
+// Convert a main screen to a sub-screen
+export const convertScreenToSubScreen = (screen: any) => {
+  return {
+    id: `sub-${Date.now()}-${screen.id}`,
+    title: screen.title,
+    description: screen.description,
+    thumbnail: screen.thumbnail,
+  };
+};

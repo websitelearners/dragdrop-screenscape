@@ -2,7 +2,7 @@
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { SubScreen } from '@/types/screen';
-import { Grip, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Grip, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -12,6 +12,7 @@ interface SubScreenItemProps {
   screenId: string;
   onDelete: (screenId: string, subScreenId: string) => void;
   onUpdateDescription: (screenId: string, subScreenId: string, description: string) => void;
+  onPromoteToScreen: (screenId: string, subScreenId: string) => void;
 }
 
 const SubScreenItem: React.FC<SubScreenItemProps> = ({
@@ -19,7 +20,8 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
   index,
   screenId,
   onDelete,
-  onUpdateDescription
+  onUpdateDescription,
+  onPromoteToScreen
 }) => {
   return (
     <Draggable draggableId={`sub-${subScreen.id}`} index={index}>
@@ -40,14 +42,25 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
             <div className="flex-1">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="font-medium">{subScreen.title}</h3>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => onDelete(screenId, subScreen.id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => onPromoteToScreen(screenId, subScreen.id)}
+                    title="Promote to main screen"
+                  >
+                    <ArrowUpRight className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => onDelete(screenId, subScreen.id)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
               
               <div className="flex gap-3">
