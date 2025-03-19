@@ -14,6 +14,7 @@ interface ScreenItemProps {
   onUpdateDescription: (id: string, description: string) => void;
   onDeleteSubScreen: (screenId: string, subScreenId: string) => void;
   onUpdateSubScreenDescription: (screenId: string, subScreenId: string, description: string) => void;
+  onPromoteSubScreen?: (screenId: string, subScreenId: string) => void;
 }
 
 const ScreenItem: React.FC<ScreenItemProps> = ({
@@ -22,7 +23,8 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
   onDelete,
   onUpdateDescription,
   onDeleteSubScreen,
-  onUpdateSubScreenDescription
+  onUpdateSubScreenDescription,
+  onPromoteSubScreen
 }) => {
   return (
     <Draggable draggableId={screen.id} index={index}>
@@ -83,6 +85,7 @@ const ScreenItem: React.FC<ScreenItemProps> = ({
                         screenId={screen.id}
                         onDelete={onDeleteSubScreen}
                         onUpdateDescription={onUpdateSubScreenDescription}
+                        onPromote={onPromoteSubScreen}
                       />
                     ))}
                     

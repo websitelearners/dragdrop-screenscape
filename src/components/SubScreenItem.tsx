@@ -12,6 +12,7 @@ interface SubScreenItemProps {
   screenId: string;
   onDelete: (screenId: string, subScreenId: string) => void;
   onUpdateDescription: (screenId: string, subScreenId: string, description: string) => void;
+  onPromote?: (screenId: string, subScreenId: string) => void;
 }
 
 const SubScreenItem: React.FC<SubScreenItemProps> = ({
@@ -19,7 +20,8 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
   index,
   screenId,
   onDelete,
-  onUpdateDescription
+  onUpdateDescription,
+  onPromote
 }) => {
   return (
     <Draggable draggableId={`sub-${subScreen.id}`} index={index}>
@@ -51,6 +53,15 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
                       <span>Drag to promote</span>
                     </div>
                   )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7"
+                    onClick={() => onPromote && onPromote(screenId, subScreen.id)}
+                  >
+                    <ArrowUpRight className="h-3 w-3 mr-1" />
+                    Promote
+                  </Button>
                   <Button
                     variant="destructive"
                     size="icon"

@@ -67,12 +67,10 @@ const DragDropScreens: React.FC = () => {
   const handleDragEnd = (result: DropResult) => {
     const { source, destination, type, draggableId } = result;
 
-    // Dropped outside the list
     if (!destination) {
       return;
     }
 
-    // Handle screen reordering
     if (type === 'screen') {
       const reorderedScreens = reorder(
         screens,
@@ -88,32 +86,24 @@ const DragDropScreens: React.FC = () => {
       return;
     }
 
-    // Handle sub-screen reordering or promotion
     if (type === 'subscreen') {
       const screenId = source.droppableId.replace('subscreen-', '');
       
-      // Check if the subscreen is dropped in the main screens container
       if (destination.droppableId === 'screens-droppable') {
-        // This is the case where a subscreen is being promoted to a main screen
-        // Find the source screen and the subscreen
         const sourceScreen = screens.find(s => s.id === screenId);
         if (!sourceScreen) return;
         
         const sourceSubScreens = [...sourceScreen.subScreens];
         const [movedSubScreen] = sourceSubScreens.splice(source.index, 1);
         
-        // Convert the subscreen to a main screen
         const newScreen = convertSubScreenToScreen(movedSubScreen);
         
-        // Create a new array of screens with the promoted subscreen
         let newScreens = [...screens];
         
-        // Update the source screen without the moved subscreen
         newScreens = newScreens.map(s => 
           s.id === screenId ? { ...s, subScreens: sourceSubScreens } : s
         );
         
-        // Add the new screen at the destination index
         newScreens.splice(destination.index, 0, newScreen);
         
         setScreens(newScreens);
@@ -126,7 +116,6 @@ const DragDropScreens: React.FC = () => {
       
       const targetScreenId = destination.droppableId.replace('subscreen-', '');
       
-      // If moving within the same screen
       if (screenId === targetScreenId) {
         const screen = screens.find(s => s.id === screenId);
         if (!screen) return;
@@ -147,7 +136,6 @@ const DragDropScreens: React.FC = () => {
           description: "The sub-screen has been moved to a new position",
         });
       } else {
-        // Moving between different screens
         const sourceScreen = screens.find(s => s.id === screenId);
         const destScreen = screens.find(s => s.id === targetScreenId);
         
@@ -273,13 +261,39 @@ const DragDropScreens: React.FC = () => {
     setScreens(updatedScreens);
   };
 
+  const handlePromoteSubScreen = (screenId: string, subScreenId: string) => {
+    const sourceScreen = screens.find(s => s.id === screenId);
+    if (!sourceScreen) return;
+    
+    const subScreenIndex = sourceScreen.subScreens.findIndex(sub => sub.id === subScreenId);
+    if (subScreenIndex === -1) return;
+    
+    const sourceSubScreens = [...sourceScreen.subScreens];
+    
+    const [movedSubScreen] = sourceSubScreens.splice(subScreenIndex, 1);
+    
+    const newScreen = convertSubScreenToScreen(movedSubScreen);
+    
+    let updatedScreens = screens.map(s => 
+      s.id === screenId ? { ...s, subScreens: sourceSubScreens } : s
+    );
+    
+    updatedScreens = [...updatedScreens, newScreen];
+    
+    setScreens(updatedScreens);
+    toast({
+      title: "Sub-screen promoted",
+      description: "The sub-screen has been converted to a main screen",
+    });
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="mb-8">
         <h1 className="mb-2 text-3xl font-bold">Drag-n-Drop Screens</h1>
         <p className="text-muted-foreground">
           Arrange your screens and sub-screens by dragging them into the desired order.
-          You can also promote a sub-screen to a main screen by dragging it to the main list.
+          You can also promote a sub-screen to a main screen by dragging it to the main list or using the promote button.
         </p>
       </div>
 
@@ -318,6 +332,7 @@ const DragDropScreens: React.FC = () => {
                     onUpdateDescription={handleUpdateScreenDescription}
                     onDeleteSubScreen={handleDeleteSubScreen}
                     onUpdateSubScreenDescription={handleUpdateSubScreenDescription}
+                    onPromoteSubScreen={handlePromoteSubScreen}
                   />
                   <Button
                     variant="outline"
