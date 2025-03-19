@@ -17,11 +17,3 @@ export const convertSubScreenToScreen = (subScreen: any, index: number = -1) => 
     subScreens: [],
   };
 };
-
-// Check if item is a sub-screen being dragged to become a screen
-export const isPromotingSubScreen = (source: any, destination: any) => {
-  return (
-    source.droppableId.startsWith('subscreen-') && 
-    destination?.droppableId === 'screens-droppable'
-  );
-};
