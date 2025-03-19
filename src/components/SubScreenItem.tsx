@@ -2,7 +2,7 @@
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
 import { SubScreen } from '@/types/screen';
-import { Grip, Trash2 } from 'lucide-react';
+import { Grip, Trash2, ArrowUpRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -23,11 +23,15 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
 }) => {
   return (
     <Draggable draggableId={`sub-${subScreen.id}`} index={index}>
-      {(provided) => (
+      {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className="rounded-md border border-border bg-card p-3"
+          className={`rounded-md border border-border bg-card p-3 ${
+            snapshot.isDragging 
+              ? "ring-2 ring-blue-500 shadow-lg z-50" 
+              : ""
+          }`}
         >
           <div className="flex items-start gap-3">
             <div 
@@ -40,14 +44,22 @@ const SubScreenItem: React.FC<SubScreenItemProps> = ({
             <div className="flex-1">
               <div className="mb-2 flex items-center justify-between">
                 <h3 className="font-medium">{subScreen.title}</h3>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="h-7 w-7"
-                  onClick={() => onDelete(screenId, subScreen.id)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  {snapshot.isDragging && (
+                    <div className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-200 flex items-center gap-1">
+                      <ArrowUpRight className="h-3 w-3" />
+                      <span>Drag to promote</span>
+                    </div>
+                  )}
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => onDelete(screenId, subScreen.id)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
               
               <div className="flex gap-3">

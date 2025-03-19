@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, DropResult, DragStart, DragUpdate } from 'react-beautiful-dnd';
 import { Screen, SubScreen } from '@/types/screen';
-import { reorder, convertSubScreenToScreen } from '@/utils/dragDropUtils';
+import { reorder, convertSubScreenToScreen, isPromotingSubScreen } from '@/utils/dragDropUtils';
 import ScreenItem from '@/components/ScreenItem';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -46,7 +46,23 @@ const initialScreens: Screen[] = [
 
 const DragDropScreens: React.FC = () => {
   const [screens, setScreens] = useState<Screen[]>(initialScreens);
+  const [isDraggingSubScreen, setIsDraggingSubScreen] = useState(false);
+  const [draggedOverMainContainer, setDraggedOverMainContainer] = useState(false);
   const { toast } = useToast();
+
+  const handleDragStart = (start: DragStart) => {
+    if (start.source.droppableId.startsWith('subscreen-')) {
+      setIsDraggingSubScreen(true);
+    }
+  };
+
+  const handleDragUpdate = (update: DragUpdate) => {
+    if (isDraggingSubScreen && update.destination) {
+      setDraggedOverMainContainer(update.destination.droppableId === 'screens-droppable');
+    } else if (isDraggingSubScreen) {
+      setDraggedOverMainContainer(false);
+    }
+  };
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination, type, draggableId } = result;
@@ -274,13 +290,24 @@ const DragDropScreens: React.FC = () => {
         </Button>
       </div>
 
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable droppableId="screens-droppable" type="screen">
-          {(provided) => (
+      <DragDropContext 
+        onDragEnd={handleDragEnd} 
+        onDragStart={handleDragStart}
+        onDragUpdate={handleDragUpdate}
+      >
+        <Droppable 
+          droppableId="screens-droppable" 
+          type="screen"
+        >
+          {(provided, snapshot) => (
             <div
               {...provided.droppableProps}
               ref={provided.innerRef}
-              className="space-y-4"
+              className={`space-y-4 ${
+                draggedOverMainContainer
+                  ? "py-4 px-2 rounded-lg outline-dashed outline-2 outline-blue-500 bg-blue-50 dark:bg-blue-900/20 transition-all duration-200"
+                  : ""
+              }`}
             >
               {screens.map((screen, index) => (
                 <div key={screen.id} className="relative">
